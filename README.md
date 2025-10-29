@@ -2,6 +2,18 @@
 
 `magic_plot` is a Python library that generates visualizations from natural language descriptions using AI. Simply describe what you want to plot in plain English, and `magic_plot` will automatically query your DuckDB database and create the visualization.
 
+## Example
+
+```python
+import duckdb
+from magic_plot import magic_plot
+con = duckdb.connect("file.db")
+magic_plot(con, "Plot monthly sales revenue by product line")
+```
+
+![png](example_plot.png)
+
+
 ## Why Magic Plot?
 
 Traditional data visualization requires writing SQL queries and matplotlib/seaborn code. With `magic_plot`, you skip both steps:
@@ -9,7 +21,7 @@ Traditional data visualization requires writing SQL queries and matplotlib/seabo
 - **No SQL required**: Describe what data you want in natural language
 - **No plotting code**: The visualization is generated automatically
 - **Fast iteration**: Try different plots by changing the description
-- **Powered by local AI**: Uses Ollama with qwen3:8b model for privacy and speed
+- **Powered by local AI**: Uses Ollama with the free, private qwen3:8b model.
 
 ## How It Works
 
@@ -30,20 +42,3 @@ You'll also need [Ollama](https://ollama.ai/) installed with the qwen3:8b model:
 ```bash
 ollama pull qwen3:8b
 ```
-
-## Usage Example
-
-```python
-import duckdb
-from magic_plot import magic_plot
-con = duckdb.connect("file.db")
-magic_plot(con, "Plot monthly sales revenue by product line")
-```
-
-![png](example_plot.png)
-
-## Requirements
-
-- Python ≥3.13
-- DuckDB database connection
-- Ollama running locally with qwen3:8b model

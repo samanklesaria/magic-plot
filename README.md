@@ -48,8 +48,10 @@ Traditional data visualization requires writing SQL queries and matplotlib/seabo
 
 ## Installation
 
+This libary is not yet stable, so it has not been released to PyPI. To add it to a `uv` project, run
+
 ```bash
-pip install magic-plot
+uv add git+https://github.com/samanklesaria/magic-plot
 ```
 
 You'll also need [Ollama](https://ollama.ai/) installed with the qwen3:8b model:

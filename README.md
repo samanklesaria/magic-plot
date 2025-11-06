@@ -11,7 +11,22 @@ con = duckdb.connect("file.db")
 magic_plot(con, "Plot monthly sales revenue by product line")
 ```
 
-![png](example_plot.png)
+![png](outputs/output_1_0.png)
+
+```python
+magic_plot(con, "Plot total revenue for each product line in a bar chart.")
+```
+
+![png](outputs/output_2_0.png)
+
+```python	
+magic_plot(con, """
+Find the total revenue for each month and product line. Average monthly totals over product lines. Plot this average revenue over time.
+""")
+```
+
+![png](outputs/output_3_0.png)
+
 
 
 ## Why Magic Plot?

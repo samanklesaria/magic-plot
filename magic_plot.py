@@ -3,7 +3,7 @@ from ollama import chat
 import duckdb
 from smolagents.local_python_executor import LocalPythonExecutor
 
-def magic_plot(con: duckdb.DuckDBPyConnection, prompt: str):
+def magic_plot(con: duckdb.DuckDBPyConnection, prompt: str, debug=False):
     """Generate a plot of the data in `con` from natural language description `prompt`.
 
     Args:
@@ -15,10 +15,10 @@ def magic_plot(con: duckdb.DuckDBPyConnection, prompt: str):
         >> con = duckdb.connect("file.db")
         >> magic_plot(con, "Plot monthly sales revenue by product line")
     """
-    df = run_sql_code(con, prompt)
+    df = run_sql_code(con, prompt, debug)
     custom_executor = LocalPythonExecutor(["matplotlib.pyplot", "seaborn"])
     custom_executor.send_variables({'df': df})
-    run_seaborn_code(custom_executor, df, prompt)
+    run_seaborn_code(custom_executor, df, prompt, debug)
 
 class MotivatedCode(BaseModel):
   reasoning: str
@@ -35,11 +35,11 @@ def table_summary(con: duckdb.DuckDBPyConnection):
             yield from [f"Table {row.name}"] + [f"- {r}: {t}" for (r, t) in zip(row.column_names, row.column_types)]
     return "\n".join(summary_rows())
 
-def run_sql_code(con: duckdb.DuckDBPyConnection, prompt: str):
+def run_sql_code(con: duckdb.DuckDBPyConnection, prompt: str, debug: bool):
     response = chat(
       model='qwen3:8b',
       messages=[{'role': 'user', 'content':
-                 f"""Generate duckdb sql code to get data necessary for the following:
+                 f"""Generate duckdb sql code to get and process data necessary for the following:
                  {prompt}
 
                  Tables are defined as follows:
@@ -51,9 +51,11 @@ def run_sql_code(con: duckdb.DuckDBPyConnection, prompt: str):
       options={'temperature': 0},  # Make responses more deterministic
     )
     query = Code.model_validate_json(response.message.content)
+    if debug:
+        print(query.code)
     return con.sql(query.code).df()
 
-def run_seaborn_code(custom_executor, df, prompt):
+def run_seaborn_code(custom_executor, df, prompt: str, debug: bool):
     response = chat(
       model='qwen3:8b',
       messages=[{'role': 'user', 'content':
@@ -62,11 +64,13 @@ def run_seaborn_code(custom_executor, df, prompt):
 
                  The input dataframe has the following columns:
                  {df.columns}
-                 Do not process, pivot, or group the data.
+                 Do not process, pivot, or group the data. The data has already be transformed appropriately. 
                  """}],
       format=Code.model_json_schema(),
       options={'temperature': 0},  # Make responses more deterministic
     )
     vis_code = Code.model_validate_json(response.message.content)
+    if debug:
+        print(vis_code.code)
     custom_executor(vis_code.code)
     custom_executor("plotit(df)")
